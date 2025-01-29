@@ -51,6 +51,20 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
+@app.route('/update-price/<id>', methods=['GET','PATCH'])
+def udpate_coffee_price(id):
+    cafe = db.get_or_404(Cafe, id)
+    if not cafe:
+        return {"error": "Cafe not found"}, 404
+    data = request.get_json()
+
+    # Update only the price field
+    if "coffee_price" in data:
+        cafe.coffee_price = data["coffee_price"]
+    db.session.commit()
+    return jsonify(response={"success":"Database 'Cafe' is successfully updated"})
+
+
 @app.route('/add', methods=['POST'])
 def add_new_cafe():
     new_cafe = Cafe(

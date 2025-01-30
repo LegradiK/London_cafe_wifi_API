@@ -51,16 +51,15 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
-@app.route('/update-price/<id>', methods=['GET','PATCH'])
-def udpate_coffee_price(id):
+@app.route('/update-price/<int:id>', methods=['PATCH'])
+def update_coffee_price(id):
     cafe = db.get_or_404(Cafe, id)
+    new_price = request.args.get("new_price")
+    print(new_price)
     if not cafe:
-        return {"error": "Cafe not found"}, 404
-    data = request.get_json()
-
+        return jsonify(error="Missing or Invalid JSON data"), 400
     # Update only the price field
-    if "coffee_price" in data:
-        cafe.coffee_price = data["coffee_price"]
+    cafe.coffee_price = new_price
     db.session.commit()
     return jsonify(response={"success":"Database 'Cafe' is successfully updated"})
 

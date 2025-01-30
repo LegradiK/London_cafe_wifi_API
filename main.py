@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
+API_KEY = "TopSecretAPIKey"
 
 # Cafe TABLE Configuration
 class Cafe(db.Model):
@@ -51,6 +52,17 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
+@app.route('/report-closed/<int:id>', methods=['DELETE'])
+def delete_cafe_data(id):
+    user_key = request.args.get("api-key")
+    if user_key == API_KEY:
+        cafe = db.get_or_404(Cafe, id)
+        db.session.delete(cafe)
+        db.session.commit()
+        return jsonify(response={"success":"cafe data is successfully deleted"}), 200
+    else:
+        return jsonify(response={"error": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
+    
 @app.route('/update-price/<int:id>', methods=['PATCH'])
 def update_coffee_price(id):
     cafe = db.get_or_404(Cafe, id)
